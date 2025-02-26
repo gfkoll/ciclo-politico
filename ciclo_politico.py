@@ -34,15 +34,30 @@ def processar_dados(historico):
     return df
 
 def main():
-    """Função principal para executar o código."""
-    historico = [
-        {"Nome": "Império Romano", "T": 60, "E": 50, "C": 100, "CS": -10, "RI": 50},
-        {"Nome": "Revolução Francesa", "T": 70, "E": -30, "C": 200, "CS": -50, "RI": 20},
-        {"Nome": "China Atual", "T": 90, "E": 80, "C": 50, "CS": 30, "RI": 100},
-    ]
+    """Função principal interativa para executar o código."""
+    historico = []
+    
+    while True:
+        nome = input("Nome da civilização/estado: ")
+        T = float(input("Tecnologia: "))
+        E = float(input("Economia: "))
+        C = float(input("Conflitos: "))
+        CS = float(input("Controle Social: "))
+        RI = float(input("Resiliência Institucional: "))
+        
+        historico.append({"Nome": nome, "T": T, "E": E, "C": C, "CS": CS, "RI": RI})
+        
+        continuar = input("Deseja adicionar outra civilização? (s/n): ").strip().lower()
+        if continuar != "s":
+            break
     
     df_resultado = processar_dados(historico)
     print(df_resultado)
+    
+    # Salvar os resultados em um arquivo CSV
+    df_resultado.to_csv("resultado_ciclo_politico.csv", index=False)
+    print("Resultados salvos em 'resultado_ciclo_politico.csv'.")
 
 if __name__ == "__main__":
     main()
+
