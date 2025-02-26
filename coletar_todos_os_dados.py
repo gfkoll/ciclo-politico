@@ -7,8 +7,10 @@ APIS = {
     "economia": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.MKTP.CD?format=json",
     "conflitos": "https://api.acleddata.com/acled/read?key=YOUR_API_KEY&format=json",
     "controle_social": "https://api.freedomhouse.org/api/v1/data/countries",
-    "resiliencia_institucional": "https://api.v-dem.net/data/latest?format=json"
+    "resiliencia_institucional": "https://api.v-dem.net/data/latest?format=json",
+    "tecnologia": "https://api.worldbank.org/v2/country/all/indicator/IP.PAT.RESD?format=json"  # Adicionando tecnologia (número de patentes)
 }
+
 
 # Função para buscar dados de uma API
 def buscar_dados(api_nome, url):
