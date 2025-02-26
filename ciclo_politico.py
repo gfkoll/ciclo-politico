@@ -1,10 +1,19 @@
 import sqlite3
-from coletar_todos_dados import coletar_todos_os_dados  # Importa a coleta automática
 
 def ciclo_politico(T, E, C, CS, RI):
-    """Calcula o Índice do Ciclo Político (CP)"""
-    CP = (T + E + C + CS) / RI if RI != 0 else None
-    return CP
+    """
+    Calcula o Índice do Ciclo Político (CP)
+    T  = Tecnologia (Índice Global de Inovação / Número de Patentes)
+    E  = Economia (PIB)
+    C  = Conflitos (Eventos de guerra, crises políticas)
+    CS = Controle Social (Liberdade de imprensa, democracia)
+    RI = Resiliência Institucional (Capacidade do governo de resistir a crises)
+    """
+    if RI == 0:
+        return None  # Evita divisão por zero
+
+    CP = (T + E + C + CS) / RI
+    return round(CP, 2)  # Retorna o índice arredondado
 
 def classificar_estagio(cp):
     """Classifica o estágio do governo com base no índice CP"""
@@ -19,42 +28,32 @@ def classificar_estagio(cp):
     else:
         return "Colapso e Transição"
 
-def obter_dados_pais(nome_pais):
-    """Consulta o banco e obtém os dados do país"""
+def calcular_cp_para_paises():
+    """Calcula o Índice do Ciclo Político para cada país armazenado no banco"""
     conn = sqlite3.connect("dados_politicos.db")
     cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT economia, conflitos, controle_social, resiliencia_institucional
-        FROM dados_politicos
-        WHERE nome = ?
-    """, (nome_pais,))
     
-    dados = cursor.fetchone()
+    # Buscar todos os países com seus indicadores
+    cursor.execute("SELECT nome, tecnologia, economia, conflitos, controle_social, resiliencia_institucional FROM dados_politicos")
+    paises = cursor.fetchall()
+    
+    resultados = []
+    
+    for pais in paises:
+        nome, T, E, C, CS, RI = pais
+        CP = ciclo_politico(T, E, C, CS, RI)
+        estagio = classificar_estagio(CP)
+
+        resultados.append({
+            "País": nome,
+            "Índice CP": CP,
+            "Estágio": estagio
+        })
+
+        print(f"{nome}: Índice CP = {CP}, Estágio = {estagio}")
+
     conn.close()
-    
-    if dados:
-        return {"T": 1.0, "E": dados[0], "C": dados[1], "CS": dados[2], "RI": dados[3]}
-    else:
-        return None
-
-def analisar_pais(nome_pais):
-    """Executa a fórmula para um país específico"""
-    dados = obter_dados_pais(nome_pais)
-    
-    if not dados:
-        print("País não encontrado no banco. Execute a coleta de dados primeiro.")
-        return
-    
-    CP = ciclo_politico(dados["T"], dados["E"], dados["C"], dados["CS"], dados["RI"])
-    estagio = classificar_estagio(CP)
-
-    print(f"\n🔹 País: {nome_pais}")
-    print(f"📊 Índice do Ciclo Político: {round(CP, 2) if CP else 'Indefinido'}")
-    print(f"🏛️ Estágio Atual: {estagio}\n")
+    return resultados  # Retorna os dados para possível uso em visualizações
 
 if __name__ == "__main__":
-    coletar_todos_os_dados()  # Atualiza os dados antes de rodar a análise
-    pais = input("Digite o nome do país: ")
-    analisar_pais(pais)
-
+    calcular_cp_para_paises()
